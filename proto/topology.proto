@@ -1,0 +1,24 @@
+syntax="proto2";
+
+package curvefs.mds.topology;
+option cc_generic_services = true;
+option go_package = "curvefs/topology";
+
+
+message StatMetadataUsageRequest{
+}
+
+message MetadataUsage{
+    // KB
+    required string metaserverAddr = 1;
+    required uint64 total = 2;
+    required uint64 used = 3;
+}
+
+message StatMetadataUsageResponse{
+    repeated MetadataUsage metadataUsages = 1;
+}
+
+service TopologyService {
+    rpc StatMetadataUsage(StatMetadataUsageRequest) returns (StatMetadataUsageResponse);
+}

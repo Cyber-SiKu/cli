@@ -4,63 +4,57 @@ import (
 	"fmt"
 	"os"
 
+	list "github.com/Cyber-SiKu/cli/cmd/list"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var (
 	// Used for flags.
-	cfgFile     string
-	userLicense string
+	confPath     string
+	format 		 string
 
-	rootCmd = &cobra.Command{
-		Use:   "cobra-cli",
-		Short: "A generator for Cobra based Applications",
-		Long: `Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	RootCmd = &cobra.Command{
+		Use:   "curvefs_tool",
+		Short: "A tool for curvefs",
+		Long: `curvefs tool is a tool for curvefs.`,
 	}
 )
 
 // Execute executes the root command.
 func Execute() error {
-	return rootCmd.Execute()
-}
-
-func init() {
 	cobra.OnInitialize(initConfig)
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
-	rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "author name for copyright attribution")
-	rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "name of license for the project")
-	rootCmd.PersistentFlags().Bool("viper", true, "use Viper for configuration")
-	viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
-	viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
-	viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
-	viper.SetDefault("license", "apache")
-
-	rootCmd.AddCommand(addCmd)
-	rootCmd.AddCommand(initCmd)
+	RootCmd.PersistentFlags().StringVar(&confPath, "conf", "", "config file (default is $HOME/.curve/curve.yaml)")
+	RootCmd.PersistentFlags().StringVar(&format, "format", "plain", "output type (json,plain)")
+	viper.BindPFlag("useViper", RootCmd.PersistentFlags().Lookup("viper"))
+	addSubCommands()
+	return RootCmd.Execute()
 }
 
 func initConfig() {
-	if cfgFile != "" {
+	if confPath != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		fmt.Println(confPath)
+		viper.SetConfigFile(confPath)
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".cobra" (without extension).
-		viper.AddConfigPath(home)
+		// Search config in home directory with name ".curvefs" (without extension).
+		viper.AddConfigPath(home+"/.curve")
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".cobra")
+		viper.SetConfigName("curve")
 	}
 
 	viper.AutomaticEnv()
-
+	viper.SetDefault("format", format)
+	
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		// fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func addSubCommands() {
+	RootCmd.AddCommand(list.NewListCmd())
 }

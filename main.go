@@ -1,9 +1,14 @@
 package main
 
 import (
-	"/home/chengyi01/code/curve_tool/cmd"
+	"os"
+
+	"github.com/Cyber-SiKu/cli/cmd"
 )
 
 func main() {
-  cmd.Execute()
+  error := cmd.Execute()
+  if error != nil {
+	os.Exit(-1)
+  }
 }
